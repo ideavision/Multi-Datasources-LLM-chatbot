@@ -2,32 +2,33 @@ import abc
 from collections.abc import Callable
 
 from llama_index.text_splitter import SentenceSplitter
-from transformers import AutoTokenizer  # type:ignore
-
-from payserai.configs.app_configs import BLURB_SIZE
-from payserai.configs.app_configs import CHUNK_OVERLAP
-from payserai.configs.app_configs import CHUNK_SIZE
-from payserai.configs.app_configs import MINI_CHUNK_SIZE
-from payserai.connectors.models import Document
-from payserai.connectors.models import Section
+from payserai.configs.app_configs import (BLURB_SIZE, CHUNK_OVERLAP,
+                                          CHUNK_SIZE, MINI_CHUNK_SIZE)
+from payserai.connectors.models import Document, Section
 from payserai.indexing.models import DocAwareChunk
 from payserai.search.search_nlp_models import get_default_tokenizer
 from payserai.utils.text_processing import shared_precompare_cleanup
-
+from transformers import AutoTokenizer  # type:ignore
 
 SECTION_SEPARATOR = "\n\n"
 ChunkFunc = Callable[[Document], list[DocAwareChunk]]
 
 
+# This function extracts a blurb from the given text. A blurb is a short description or summary.
 def extract_blurb(text: str, blurb_size: int) -> str:
+    # Get the default tokenizer function
     token_count_func = get_default_tokenizer().tokenize
+    
+    # Create a SentenceSplitter object with the tokenizer function, blurb size and no overlap
     blurb_splitter = SentenceSplitter(
         tokenizer=token_count_func, chunk_size=blurb_size, chunk_overlap=0
     )
 
+    # Split the text into chunks and return the first chunk as the blurb
     return blurb_splitter.split_text(text)[0]
 
 
+def chunk_large_section(
 def chunk_large_section(
     section: Section,
     document: Document,
@@ -37,16 +38,22 @@ def chunk_large_section(
     chunk_overlap: int = CHUNK_OVERLAP,
     blurb_size: int = BLURB_SIZE,
 ) -> list[DocAwareChunk]:
+    # Get the text and link from the section
     section_text = section.text
     section_link_text = section.link or ""
+    
+    # Extract a blurb from the section text
     blurb = extract_blurb(section_text, blurb_size)
 
+    # Create a SentenceSplitter object with the tokenizer function, chunk size and overlap
     sentence_aware_splitter = SentenceSplitter(
         tokenizer=tokenizer.tokenize, chunk_size=chunk_size, chunk_overlap=chunk_overlap
     )
 
+    # Split the section text into chunks
     split_texts = sentence_aware_splitter.split_text(section_text)
 
+    # Create a list of DocAwareChunk objects from the split texts
     chunks = [
         DocAwareChunk(
             source_document=document,
