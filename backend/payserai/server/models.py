@@ -1,40 +1,20 @@
 from datetime import datetime
-from typing import Any
-from typing import Generic
-from typing import Optional
-from typing import TypeVar
+from typing import Any, Generic, Optional, TypeVar
 from uuid import UUID
 
-from pydantic import BaseModel
-from pydantic import validator
-from pydantic.generics import GenericModel
-
 from payserai.auth.schemas import UserRole
-from payserai.configs.app_configs import DOCUMENT_INDEX_NAME
-from payserai.configs.app_configs import MASK_CREDENTIAL_PREFIX
-from payserai.configs.constants import AuthType
-from payserai.configs.constants import DocumentSource
-from payserai.configs.constants import MessageType
-from payserai.configs.constants import QAFeedbackType
-from payserai.configs.constants import SearchFeedbackType
-from payserai.connectors.models import DocumentBase
-from payserai.connectors.models import InputType
-from payserai.payseraibot.slack.config import VALID_SLACK_FILTERS
-from payserai.db.models import AllowepayseraiFilters
-from payserai.db.models import ChannelConfig
-from payserai.db.models import Connector
-from payserai.db.models import Credential
+from payserai.configs import app_configs, constants
+from payserai.connectors.models import DocumentBase, InputType
+from payserai.db.models import (AllowepayseraiFilters, ChannelConfig,
+                                Connector, Credential)
 from payserai.db.models import DocumentSet as DocumentSetDBModel
-from payserai.db.models import IndexAttempt
-from payserai.db.models import IndexingStatus
-from payserai.db.models import TaskStatus
-from payserai.direct_qa.interfaces import payseraiAnswer
-from payserai.direct_qa.interfaces import payseraiQuote
-from payserai.search.models import BaseFilters
-from payserai.search.models import QueryFlow
-from payserai.search.models import SearchType
+from payserai.db.models import IndexAttempt, IndexingStatus, TaskStatus
+from payserai.direct_qa.interfaces import payseraiAnswer, payseraiQuote
+from payserai.payseraibot.slack.config import VALID_SLACK_FILTERS
+from payserai.search.models import BaseFilters, QueryFlow, SearchType
 from payserai.server.utils import mask_credential_dict
-
+from pydantic import BaseModel, validator
+from pydantic.generics import GenericModel
 
 DataT = TypeVar("DataT")
 
@@ -372,25 +352,25 @@ class ConnectorBase(BaseModel):
 
 
 class ConnectorSnapshot(ConnectorBase):
-    id: int
-    credential_ids: list[int]
-    time_created: datetime
-    time_updated: datetime
+    connector_id: int
+    associated_credential_ids: list[int]
+    creation_time: datetime
+    last_updated_time: datetime
 
     @classmethod
     def from_connector_db_model(cls, connector: Connector) -> "ConnectorSnapshot":
         return ConnectorSnapshot(
-            id=connector.id,
+            connector_id=connector.id,
             name=connector.name,
             source=connector.source,
             input_type=connector.input_type,
             connector_specific_config=connector.connector_specific_config,
             refresh_freq=connector.refresh_freq,
-            credential_ids=[
+            associated_credential_ids=[
                 association.credential.id for association in connector.credentials
             ],
-            time_created=connector.time_created,
-            time_updated=connector.time_updated,
+            creation_time=connector.time_created,
+            last_updated_time=connector.time_updated,
             disabled=connector.disabled,
         )
 
