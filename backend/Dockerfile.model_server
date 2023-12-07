@@ -1,0 +1,30 @@
+FROM python:3.11.4-slim-bookworm
+
+# Default PAYSERAI_VERSION, typically overriden during builds by GitHub Actions.
+ARG PAYSERAI_VERSION=1.0
+ENV PAYSERAI_VERSION=${PAYSERAI_VERSION}
+RUN echo "PAYSERAI_VERSION: ${PAYSERAI_VERSION}"
+
+COPY ./requirements/model_server.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /tmp/requirements.txt
+
+WORKDIR /app
+# Needed for model configs and defaults
+COPY ./payserai/configs /app/payserai/configs
+COPY ./payserai/dynamic_configs /app/payserai/dynamic_configs
+# Utils used by model server
+COPY ./payserai/utils/logger.py /app/payserai/utils/logger.py
+COPY ./payserai/utils/timing.py /app/payserai/utils/timing.py
+COPY ./payserai/utils/telemetry.py /app/payserai/utils/telemetry.py
+# Version information
+COPY ./payserai/__init__.py /app/payserai/__init__.py
+# Shared implementations for running NLP models locally
+COPY ./payserai/search/search_nlp_models.py /app/payserai/search/search_nlp_models.py
+# Request/Response models
+COPY ./shared_models /app/shared_models
+# Model Server main code
+COPY ./model_server /app/model_server
+
+ENV PYTHONPATH /app
+
+CMD ["uvicorn", "model_server.main:app", "--host", "0.0.0.0", "--port", "9000"]

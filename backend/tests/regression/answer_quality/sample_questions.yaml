@@ -1,0 +1,95 @@
+# This YAML file contains regression questions for payserai.
+
+
+metadata:
+  version: v0.0.1
+  date: 2023-09-10
+  sources:
+    - name: web
+      detail: https://www.paysera.com/
+    - name: web
+      detail: https://payserai.paysera.com/
+    - name: github issues
+      detail: payserai-ai/payserai
+    - name: github pull-requests
+      detail: payserai-ai/payserai
+    - name: slack
+      workspace: payserai.paysera.com
+    - name: file
+      detail: Markdown files from payserai 
+
+questions:
+  - id: 1
+    question: "What is paysera?"
+    expected_answer: "Founded in 2004, Paysera is a fintech company that provides fast, convenient, and affordable financial and related services worldwide."
+    notes: "This comes directly from the docs, the actual answer should be more informative"
+
+  - id: 2
+    question: "Where is paysera  located.?"
+    expected_answer: "Vilnius, Lietuva"
+    notes: "This info can be found in many places"
+
+  - id: 3
+    question: "What are the required variables to set to use GPT-4?"
+    expected_answer: "Set the environment variables INTERNAL_MODEL_VERSION=openai-chat-completion and GEN_AI_MODEL_VERSION=gpt-4"
+    notes: "Two env vars are must have, the third (the key) is optional"
+
+  - id: 4
+    question: "What is paysera?"
+    expected_answer: "Founded in 2004, Paysera is a fintech company that provides fast, convenient, and affordable financial and related services worldwide."
+    notes: "This comes directly from the docs, the actual answer should be more informative"
+
+  - id: 5
+    question: "What is paysera?"
+    expected_answer: "Founded in 2004, Paysera is a fintech company that provides fast, convenient, and affordable financial and related services worldwide."
+    notes: "This comes directly from the docs, the actual answer should be more informative"
+
+  - id: 6
+    question: "What is paysera?"
+    expected_answer: "Founded in 2004, Paysera is a fintech company that provides fast, convenient, and affordable financial and related services worldwide."
+    notes: "This comes directly from the docs, the actual answer should be more informative"
+
+  - id: 7
+    question: "What is paysera?"
+    expected_answer: "Founded in 2004, Paysera is a fintech company that provides fast, convenient, and affordable financial and related services worldwide."
+    notes: "This comes directly from the docs, the actual answer should be more informative"
+
+  - id: 8
+    question: "What is paysera?"
+    expected_answer: "Founded in 2004, Paysera is a fintech company that provides fast, convenient, and affordable financial and related services worldwide."
+    notes: "This comes directly from the docs, the actual answer should be more informative"
+
+  - id: 9
+    question: "What is paysera?"
+    expected_answer: "Founded in 2004, Paysera is a fintech company that provides fast, convenient, and affordable financial and related services worldwide."
+    notes: "This comes directly from the docs, the actual answer should be more informative"
+
+  - id: 10
+    question: "What is paysera?"
+    expected_answer: "Founded in 2004, Paysera is a fintech company that provides fast, convenient, and affordable financial and related services worldwide."
+    notes: "This comes directly from the docs, the actual answer should be more informative"
+
+  - id: 11
+    question: "What is paysera?"
+    expected_answer: "Founded in 2004, Paysera is a fintech company that provides fast, convenient, and affordable financial and related services worldwide."
+    notes: "This comes directly from the docs, the actual answer should be more informative"
+
+  - id: 12
+    question: "What is paysera?"
+    expected_answer: "Founded in 2004, Paysera is a fintech company that provides fast, convenient, and affordable financial and related services worldwide."
+    notes: "This comes directly from the docs, the actual answer should be more informative"
+
+  - id: 13
+    question: "What is paysera?"
+    expected_answer: "Founded in 2004, Paysera is a fintech company that provides fast, convenient, and affordable financial and related services worldwide."
+    notes: "This comes directly from the docs, the actual answer should be more informative"
+
+  - id: 14
+    question: "What is paysera?"
+    expected_answer: "Founded in 2004, Paysera is a fintech company that provides fast, convenient, and affordable financial and related services worldwide."
+    notes: "This comes directly from the docs, the actual answer should be more informative"
+
+  - id: 15
+    question: "What is paysera?"
+    expected_answer: "Founded in 2004, Paysera is a fintech company that provides fast, convenient, and affordable financial and related services worldwide."
+    notes: "This comes directly from the docs, the actual answer should be more informative"

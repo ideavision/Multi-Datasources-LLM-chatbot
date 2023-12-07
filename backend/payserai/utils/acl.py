@@ -1,0 +1,65 @@
+from threading import Thread
+
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from payserai.access.models import DocumentAccess
+from payserai.db.document import get_acccess_info_for_documents
+from payserai.db.engine import get_sqlalchemy_engine
+from payserai.db.models import Document
+from payserai.document_index.factory import get_default_document_index
+from payserai.document_index.interfaces import UpdateRequest
+from payserai.document_index.vespa.index import VespaIndex
+from payserai.dynamic_configs import get_dynamic_config_store
+from payserai.dynamic_configs.interface import ConfigNotFoundError
+from payserai.utils.logger import setup_logger
+
+logger = setup_logger()
+
+
+_COMPLETED_ACL_UPDATE_KEY = "completed_acl_update"
+
+
+def set_acl_for_vespa(should_check_if_already_done: bool = False) -> None:
+    """Updates the ACL for all documents based on the state of Postgres."""
+    dynamic_config_store = get_dynamic_config_store()
+    if should_check_if_already_done:
+        try:
+            # if entry is found, then we've already done this
+            dynamic_config_store.load(_COMPLETED_ACL_UPDATE_KEY)
+            return
+        except ConfigNotFoundError:
+            pass
+
+    vespa_index = get_default_document_index()
+    if not isinstance(vespa_index, VespaIndex):
+        raise ValueError("This script is only for Vespa indexes")
+
+    logger.info("Populating Access Control List fields in Vespa")
+    with Session(get_sqlalchemy_engine()) as db_session:
+        # for all documents, set the `access_control_list` field apporpriately
+        # based on the state of Postgres
+        documents = db_session.scalars(select(Document)).all()
+        document_access_info = get_acccess_info_for_documents(
+            db_session=db_session,
+            document_ids=[document.id for document in documents],
+        )
+        vespa_index.update(
+            update_requests=[
+                UpdateRequest(
+                    document_ids=[document_id],
+                    access=DocumentAccess.build(user_ids, is_public),
+                )
+                for document_id, user_ids, is_public in document_access_info
+            ],
+        )
+
+    dynamic_config_store.store(_COMPLETED_ACL_UPDATE_KEY, True)
+
+
+def set_acl_for_vespa_nonblocking(should_check_if_already_done: bool = False) -> None:
+    """Kick off the ACL update in a separate thread so that other work can continue."""
+    Thread(
+        target=set_acl_for_vespa,
+        args=[should_check_if_already_done],
+    ).start()

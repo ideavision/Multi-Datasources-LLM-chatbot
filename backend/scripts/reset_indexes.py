@@ -1,0 +1,25 @@
+# This file is purely for development use, not included in any builds
+import os
+import sys
+
+import requests
+
+# makes it so `PYTHONPATH=.` is not required when running this script
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(parent_dir)
+
+from payserai.configs.app_configs import DOCUMENT_INDEX_NAME  # noqa: E402
+from payserai.document_index.vespa.index import DOCUMENT_ID_ENDPOINT  # noqa: E402
+from payserai.utils.logger import setup_logger  # noqa: E402
+
+logger = setup_logger()
+
+
+def wipe_vespa_index() -> None:
+    params = {"selection": "true", "cluster": DOCUMENT_INDEX_NAME}
+    response = requests.delete(DOCUMENT_ID_ENDPOINT, params=params)
+    response.raise_for_status()
+
+
+if __name__ == "__main__":
+    wipe_vespa_index()
