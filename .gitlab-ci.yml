@@ -1,0 +1,27 @@
+stages:
+  - build
+  - test
+  - deploy
+
+build:
+  stage: build
+  script:
+    - echo "Building the project"
+    - # Add project-specific build commands here
+
+test:
+  stage: test
+  script:
+    - echo "Running tests"
+    - # Add project-specific test commands here
+
+deploy:
+  stage: deploy
+  script:
+    - echo "Deploying the project"
+    - echo "Saving Vespa and Postgres state"
+    - # Use the logic from the "save_vespa" and "save_postgres" functions in the "save_load_state.py" script
+    - # Make sure to use environment variables for configuration, as shown in the "app_configs.py" file
+    - echo "Loading Vespa and Postgres state"
+    - # Use the logic from the "load_vespa" and "load_postgres" functions in the "save_load_state.py" script
+    - # Again, use environment variables for configuration
