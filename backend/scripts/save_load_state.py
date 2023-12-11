@@ -24,14 +24,18 @@ def save_postgres(filename: str, container_name: str) -> None:
     logger.info("Attempting to take Postgres snapshot")
     cmd = f"docker exec {container_name} pg_dump -U {POSTGRES_USER} -h {POSTGRES_HOST} -p {POSTGRES_PORT} -W -F t {POSTGRES_DB}"
     with open(filename, "w") as file:
-        subprocess.run(
-            cmd,
-            shell=True,
-            check=True,
-            stdout=file,
-            text=True,
-            input=f"{POSTGRES_PASSWORD}\n",
-        )
+        try:
+            subprocess.run(
+                cmd,
+                shell=True,
+                check=True,
+                stdout=file,
+                text=True,
+                input=f"{POSTGRES_PASSWORD}\n",
+            )
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Failed to save Postgres snapshot: {e}")
+            return
 
 
 def load_postgres(filename: str, container_name: str) -> None:
@@ -53,7 +57,11 @@ def load_postgres(filename: str, container_name: str) -> None:
         f"docker exec {container_name} pg_restore --clean -U {POSTGRES_USER} "
         f"-h localhost -p {POSTGRES_PORT} -d {POSTGRES_DB} -1 -F t {container_file_path}"
     )
-    subprocess.run(restore_cmd, shell=True, check=True)
+    try:
+        subprocess.run(restore_cmd, shell=True, check=True)
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Failed to load Postgres snapshot: {e}")
+        return
 
 
 def save_vespa(filename: str) -> None:
@@ -65,7 +73,11 @@ def save_vespa(filename: str) -> None:
         if continuation:
             params = {"continuation": continuation}
         response = requests.get(DOCUMENT_ID_ENDPOINT, params=params)
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except requests.HTTPError as e:
+            logger.error(f"Failed to take Vespa snapshot: {e}")
+            return
         found = response.json()
         continuation = found.get("continuation")
         docs = found["documents"]
@@ -104,13 +116,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--postgres_container_name",
         type=str,
-        default="payserai-stack-relational_db-1",
+        default=os.environ.get("POSTGRES_CONTAINER_NAME", "payserai-stack-relational_db-1"),
         help="Name of the postgres container to dump",
     )
     parser.add_argument(
         "--checkpoint_dir",
         type=str,
-        default=os.path.join("..", "payserai_checkpoint"),
+        default=os.environ.get("CHECKPOINT_DIR", os.path.join("..", "payserai_checkpoint")),
         help="A directory to store temporary files to.",
     )
 
